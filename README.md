@@ -5,10 +5,10 @@
 # Web UI
 A browser interface based on Gradio library for Stable Diffusion.
 
-Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Custom-Scripts) wiki page for extra scripts developed by users.
+Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Custom-Scripts) wiki page for extra scripts developed by users. 
 
 ## Features
-[Detailed feature showcase with images](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features):
+[Detailed feature showcase with images](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features)
 - Original txt2img and img2img modes
 - One click install and run script (but you still must install python and git)
 - Outpainting
@@ -86,44 +86,6 @@ Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-web
 - API
 - Support for dedicated [inpainting model](https://github.com/runwayml/stable-diffusion#inpainting-with-stable-diffusion) by RunwayML. 
 - via extension: [Aesthetic Gradients](https://github.com/AUTOMATIC1111/stable-diffusion-webui-aesthetic-gradients), a way to generate images with a specific aesthetic by using clip images embds (implementation of [https://github.com/vicgalle/stable-diffusion-aesthetic-gradients](https://github.com/vicgalle/stable-diffusion-aesthetic-gradients))
-
-## Where are Aesthetic Gradients?!?!
-Aesthetic Gradients are now an extension. You can install it using git:
-
-```commandline
-git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-aesthetic-gradients extensions/aesthetic-gradients
-```
-
-After running this command, make sure that you have `aesthetic-gradients` dir in webui's `extensions` directory and restart
-the UI. The interface for Aesthetic Gradients should appear exactly the same as it was.
-
-## Where is History/Image browser?!?!
-Image browser is now an extension. You can install it using git:
-
-```commandline
-git clone https://github.com/yfszzx/stable-diffusion-webui-images-browser extensions/images-browser
-```
-
-After running this command, make sure that you have `images-browser` dir in webui's `extensions` directory and restart
-the UI. The interface for Image browser should appear exactly the same as it was.
-
-## Installation and Running
-Make sure the required [dependencies](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Dependencies) are met and follow the instructions available for both [NVidia](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs) (recommended) and [AMD](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-AMD-GPUs) GPUs.
-
-Alternatively, use online services (like Google Colab):
-
-- [List of Online Services](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Online-Services)
-
-### Automatic Installation on Windows
-1. Install [Python 3.10.6](https://www.python.org/downloads/windows/), checking "Add Python to PATH"
-2. Install [git](https://git-scm.com/download/win).
-3. Download the stable-diffusion-webui repository, for example by running `git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git`.
-4. Place `model.ckpt` in the `models` directory (see [dependencies](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Dependencies) for where to get it).
-5. _*(Optional)*_ Place `GFPGANv1.4.pth` in the base directory, alongside `webui.py` (see [dependencies](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Dependencies) for where to get it).
-6. Run `webui-user.bat` from Windows Explorer as normal, non-administrator, user.
-
-## Documentation
-The documentation was moved from this README over to the project's [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki).
 
 ## Credits
 - Stable Diffusion - https://github.com/CompVis/stable-diffusion, https://github.com/CompVis/taming-transformers
