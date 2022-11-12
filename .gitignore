@@ -31,3 +31,13 @@ notification.mp3
 /extensions
 /test/stdout.txt
 /test/stderr.txt
+
+## Digil Diffusion ##
+Digil Diffusion.lnk
+models/deepbooru/Put your deepbooru release project folder here.txt
+models/Stable-diffusion/Put Stable Diffusion checkpoints here.txt
+models/VAE/Put VAE here.txt
+webui-user.bat
+webui-user.sh
+webui.sh
+webui-user.bat
