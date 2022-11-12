@@ -1,7 +1,9 @@
-# Stable Diffusion web UI
-A browser interface based on Gradio library for Stable Diffusion.
+# Digil Diffusion
 
-![](txt2img_Screenshot.png)
+*Digil Diffusion* is an amalgamation of various open source projects that contribute to the use of and extension to the utility of Stable Diffusion, **an AI driven machine learning model used to generate digital images from natural language descriptions**.
+
+# Web UI
+A browser interface based on Gradio library for Stable Diffusion.
 
 Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Custom-Scripts) wiki page for extra scripts developed by users.
 
@@ -119,28 +121,6 @@ Alternatively, use online services (like Google Colab):
 4. Place `model.ckpt` in the `models` directory (see [dependencies](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Dependencies) for where to get it).
 5. _*(Optional)*_ Place `GFPGANv1.4.pth` in the base directory, alongside `webui.py` (see [dependencies](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Dependencies) for where to get it).
 6. Run `webui-user.bat` from Windows Explorer as normal, non-administrator, user.
-
-### Automatic Installation on Linux
-1. Install the dependencies:
-```bash
-# Debian-based:
-sudo apt install wget git python3 python3-venv
-# Red Hat-based:
-sudo dnf install wget git python3
-# Arch-based:
-sudo pacman -S wget git python3
-```
-2. To install in `/home/$(whoami)/stable-diffusion-webui/`, run:
-```bash
-bash <(wget -qO- https://raw.githubusercontent.com/AUTOMATIC1111/stable-diffusion-webui/master/webui.sh)
-```
-
-### Installation on Apple Silicon
-
-Find the instructions [here](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Installation-on-Apple-Silicon).
-
-## Contributing
-Here's how to add code to this repo: [Contributing](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Contributing)
 
 ## Documentation
 The documentation was moved from this README over to the project's [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki).
