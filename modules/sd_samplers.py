@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import namedtuple, deque
 import numpy as np
 from math import floor
 import torch
@@ -6,6 +6,7 @@ import tqdm
 from PIL import Image
 import inspect
 import k_diffusion.sampling
+import torchsde._brownian.brownian_interval
 import ldm.models.diffusion.ddim
 import ldm.models.diffusion.plms
 from modules import prompt_parser, devices, processing, images
@@ -18,7 +19,7 @@ from modules.script_callbacks import CFGDenoiserParams, cfg_denoiser_callback
 SamplerData = namedtuple('SamplerData', ['name', 'constructor', 'aliases', 'options'])
 
 samplers_k_diffusion = [
-    ('Euler a', 'sample_euler_ancestral', ['k_euler_a'], {}),
+    ('Euler a', 'sample_euler_ancestral', ['k_euler_a', 'k_euler_ancestral'], {}),
     ('Euler', 'sample_euler', ['k_euler'], {}),
     ('LMS', 'sample_lms', ['k_lms'], {}),
     ('Heun', 'sample_heun', ['k_heun'], {}),
@@ -26,6 +27,7 @@ samplers_k_diffusion = [
     ('DPM2 a', 'sample_dpm_2_ancestral', ['k_dpm_2_a'], {}),
     ('DPM++ 2S a', 'sample_dpmpp_2s_ancestral', ['k_dpmpp_2s_a'], {}),
     ('DPM++ 2M', 'sample_dpmpp_2m', ['k_dpmpp_2m'], {}),
+    ('DPM++ SDE', 'sample_dpmpp_sde', ['k_dpmpp_sde'], {}),
     ('DPM fast', 'sample_dpm_fast', ['k_dpm_fast'], {}),
     ('DPM adaptive', 'sample_dpm_adaptive', ['k_dpm_ad'], {}),
     ('LMS Karras', 'sample_lms', ['k_lms_ka'], {'scheduler': 'karras'}),
@@ -33,6 +35,7 @@ samplers_k_diffusion = [
     ('DPM2 a Karras', 'sample_dpm_2_ancestral', ['k_dpm_2_a_ka'], {'scheduler': 'karras'}),
     ('DPM++ 2S a Karras', 'sample_dpmpp_2s_ancestral', ['k_dpmpp_2s_a_ka'], {'scheduler': 'karras'}),
     ('DPM++ 2M Karras', 'sample_dpmpp_2m', ['k_dpmpp_2m_ka'], {'scheduler': 'karras'}),
+    ('DPM++ SDE Karras', 'sample_dpmpp_sde', ['k_dpmpp_sde_ka'], {'scheduler': 'karras'}),
 ]
 
 samplers_data_k_diffusion = [
@@ -50,6 +53,7 @@ all_samplers_map = {x.name: x for x in all_samplers}
 
 samplers = []
 samplers_for_img2img = []
+samplers_map = {}
 
 
 def create_sampler(name, model):
@@ -74,6 +78,12 @@ def set_samplers():
 
     samplers = [x for x in all_samplers if x.name not in hidden]
     samplers_for_img2img = [x for x in all_samplers if x.name not in hidden_img2img]
+
+    samplers_map.clear()
+    for sampler in all_samplers:
+        samplers_map[sampler.name.lower()] = sampler.name
+        for alias in sampler.aliases:
+            samplers_map[alias.lower()] = sampler.name
 
 
 set_samplers()
@@ -335,17 +345,43 @@ class CFGDenoiser(torch.nn.Module):
 
 
 class TorchHijack:
-    def __init__(self, kdiff_sampler):
-        self.kdiff_sampler = kdiff_sampler
+    def __init__(self, sampler_noises):
+        # Using a deque to efficiently receive the sampler_noises in the same order as the previous index-based
+        # implementation.
+        self.sampler_noises = deque(sampler_noises)
 
     def __getattr__(self, item):
         if item == 'randn_like':
-            return self.kdiff_sampler.randn_like
+            return self.randn_like
 
         if hasattr(torch, item):
             return getattr(torch, item)
 
         raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, item))
+
+    def randn_like(self, x):
+        if self.sampler_noises:
+            noise = self.sampler_noises.popleft()
+            if noise.shape == x.shape:
+                return noise
+
+        if x.device.type == 'mps':
+            return torch.randn_like(x, device=devices.cpu).to(x.device)
+        else:
+            return torch.randn_like(x)
+
+
+# MPS fix for randn in torchsde
+def torchsde_randn(size, dtype, device, seed):
+    if device.type == 'mps':
+        generator = torch.Generator(devices.cpu).manual_seed(int(seed))
+        return torch.randn(size, dtype=dtype, device=devices.cpu, generator=generator).to(device)
+    else:
+        generator = torch.Generator(device).manual_seed(int(seed))
+        return torch.randn(size, dtype=dtype, device=device, generator=generator)
+
+
+torchsde._brownian.brownian_interval._randn = torchsde_randn
 
 
 class KDiffusionSampler:
@@ -358,7 +394,6 @@ class KDiffusionSampler:
         self.extra_params = sampler_extra_params.get(funcname, [])
         self.model_wrap_cfg = CFGDenoiser(self.model_wrap)
         self.sampler_noises = None
-        self.sampler_noise_index = 0
         self.stop_at = None
         self.eta = None
         self.default_eta = 1.0
@@ -391,26 +426,13 @@ class KDiffusionSampler:
     def number_of_needed_noises(self, p):
         return p.steps
 
-    def randn_like(self, x):
-        noise = self.sampler_noises[self.sampler_noise_index] if self.sampler_noises is not None and self.sampler_noise_index < len(self.sampler_noises) else None
-
-        if noise is not None and x.shape == noise.shape:
-            res = noise
-        else:
-            res = torch.randn_like(x)
-
-        self.sampler_noise_index += 1
-        return res
-
     def initialize(self, p):
         self.model_wrap_cfg.mask = p.mask if hasattr(p, 'mask') else None
         self.model_wrap_cfg.nmask = p.nmask if hasattr(p, 'nmask') else None
         self.model_wrap.step = 0
-        self.sampler_noise_index = 0
         self.eta = p.eta or opts.eta_ancestral
 
-        if self.sampler_noises is not None:
-            k_diffusion.sampling.torch = TorchHijack(self)
+        k_diffusion.sampling.torch = TorchHijack(self.sampler_noises if self.sampler_noises is not None else [])
 
         extra_params_kwargs = {}
         for param_name in self.extra_params:
