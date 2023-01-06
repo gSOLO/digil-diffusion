@@ -435,11 +435,9 @@ def create_toprow(is_img2img):
             with gr.Row():
                 with gr.Column(scale=1, elem_id="style_pos_col"):
                     prompt_style = gr.Dropdown(label="Style 1", elem_id=f"{id_part}_style_index", choices=[k for k, v in shared.prompt_styles.styles.items()], value=next(iter(shared.prompt_styles.styles.keys())))
-                    prompt_style.save_to_config = True
 
                 with gr.Column(scale=1, elem_id="style_neg_col"):
                     prompt_style2 = gr.Dropdown(label="Style 2", elem_id=f"{id_part}_style2_index", choices=[k for k, v in shared.prompt_styles.styles.items()], value=next(iter(shared.prompt_styles.styles.keys())))
-                    prompt_style2.save_to_config = True
 
     return prompt, prompt_style, negative_prompt, prompt_style2, submit, button_interrogate, button_deepbooru, prompt_style_apply, save_style, paste, token_counter, token_button
 
@@ -550,6 +548,8 @@ Requested path was: {f}
                 os.startfile(path)
             elif platform.system() == "Darwin":
                 sp.Popen(["open", path])
+            elif "microsoft-standard-WSL2" in platform.uname().release:
+                sp.Popen(["wsl-open", path])
             else:
                 sp.Popen(["xdg-open", path])
 
@@ -560,7 +560,7 @@ Requested path was: {f}
             generation_info = None
             with gr.Column():
                 with gr.Row(elem_id=f"image_buttons_{tabname}"):
-                    open_folder_button = gr.Button(folder_symbol, elem_id="hidden_element" if shared.cmd_opts.hide_ui_dir_config else 'open_folder')
+                    open_folder_button = gr.Button(folder_symbol, elem_id="hidden_element" if shared.cmd_opts.hide_ui_dir_config else f'open_folder_{tabname}')
 
                     if tabname != "extras":
                         save = gr.Button('Save', elem_id=f'save_{tabname}')
@@ -576,13 +576,13 @@ Requested path was: {f}
 
                 if tabname != "extras":
                     with gr.Row():
-                        download_files = gr.File(None, file_count="multiple", interactive=False, show_label=False, visible=False)
+                        download_files = gr.File(None, file_count="multiple", interactive=False, show_label=False, visible=False, elem_id=f'download_files_{tabname}')
 
                     with gr.Group():
-                        html_info = gr.HTML()
-                        html_log = gr.HTML()
+                        html_info = gr.HTML(elem_id=f'html_info_{tabname}')
+                        html_log = gr.HTML(elem_id=f'html_log_{tabname}')
 
-                        generation_info = gr.Textbox(visible=False)
+                        generation_info = gr.Textbox(visible=False, elem_id=f'generation_info_{tabname}')
                         if tabname == 'txt2img' or tabname == 'img2img':
                             generation_info_button = gr.Button(visible=False, elem_id=f"{tabname}_generation_info_button")
                             generation_info_button.click(
@@ -624,9 +624,9 @@ Requested path was: {f}
                         )
 
                 else:
-                    html_info_x = gr.HTML()
-                    html_info = gr.HTML()
-                    html_log = gr.HTML()
+                    html_info_x = gr.HTML(elem_id=f'html_info_x_{tabname}')
+                    html_info = gr.HTML(elem_id=f'html_info_{tabname}')
+                    html_log = gr.HTML(elem_id=f'html_log_{tabname}')
 
                 parameters_copypaste.bind_buttons(buttons, result_gallery, "txt2img" if tabname == "txt2img" else None)
                 return result_gallery, generation_info if tabname != "extras" else html_info_x, html_info, html_log
@@ -636,7 +636,6 @@ def create_sampler_and_steps_selection(choices, tabname):
     if opts.samplers_in_dropdown:
         with FormRow(elem_id=f"sampler_selection_{tabname}"):
             sampler_index = gr.Dropdown(label='Sampling method', elem_id=f"{tabname}_sampling", choices=[x.name for x in choices], value=choices[0].name, type="index")
-            sampler_index.save_to_config = True
             steps = gr.Slider(minimum=1, maximum=150, step=1, elem_id=f"{tabname}_steps", label="Sampling steps", value=20)
     else:
         with FormGroup(elem_id=f"sampler_selection_{tabname}"):
@@ -1696,7 +1695,9 @@ def create_ui():
 
         if os.path.exists("html/footer.html"):
             with open("html/footer.html", encoding="utf8") as file:
-                gr.HTML(file.read(), elem_id="footer")
+                footer = file.read()
+                footer = footer.format(versions=versions_html())
+                gr.HTML(footer, elem_id="footer")
 
         text_settings = gr.Textbox(elem_id="settings_json", value=lambda: opts.dumpjson(), visible=False)
         settings_submit.click(
@@ -1790,7 +1791,7 @@ def create_ui():
                 if init_field is not None:
                     init_field(saved_value)
 
-        if type(x) in [gr.Slider, gr.Radio, gr.Checkbox, gr.Textbox, gr.Number] and x.visible:
+        if type(x) in [gr.Slider, gr.Radio, gr.Checkbox, gr.Textbox, gr.Number, gr.Dropdown] and x.visible:
             apply_field(x, 'visible')
 
         if type(x) == gr.Slider:
@@ -1811,11 +1812,8 @@ def create_ui():
         if type(x) == gr.Number:
             apply_field(x, 'value')
 
-        # Since there are many dropdowns that shouldn't be saved,
-        # we only mark dropdowns that should be saved.
-        if type(x) == gr.Dropdown and getattr(x, 'save_to_config', False):
+        if type(x) == gr.Dropdown:
             apply_field(x, 'value', lambda val: val in x.choices, getattr(x, 'init_field', None))
-            apply_field(x, 'visible')
 
     visit(txt2img_interface, loadsave, "txt2img")
     visit(img2img_interface, loadsave, "img2img")
@@ -1857,3 +1855,30 @@ def reload_javascript():
 
 if not hasattr(shared, 'GradioTemplateResponseOriginal'):
     shared.GradioTemplateResponseOriginal = gradio.routes.templates.TemplateResponse
+
+
+def versions_html():
+    import torch
+    import launch
+
+    python_version = ".".join([str(x) for x in sys.version_info[0:3]])
+    commit = launch.commit_hash()
+    short_commit = commit[0:8]
+
+    if shared.xformers_available:
+        import xformers
+        xformers_version = xformers.__version__
+    else:
+        xformers_version = "N/A"
+
+    return f"""
+python: <span title="{sys.version}">{python_version}</span>
+ • 
+torch: {torch.__version__}
+ • 
+xformers: {xformers_version}
+ • 
+gradio: {gr.__version__}
+ • 
+commit: <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/commit/{commit}">{short_commit}</a>
+"""
