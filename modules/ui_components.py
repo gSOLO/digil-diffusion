@@ -23,3 +23,17 @@ class FormGroup(gr.Group, gr.components.FormComponent):
 
     def get_block_name(self):
         return "group"
+
+
+class FormHTML(gr.HTML, gr.components.FormComponent):
+    """Same as gr.HTML but fits inside gradio forms"""
+
+    def get_block_name(self):
+        return "html"
+
+
+class FormColorPicker(gr.ColorPicker, gr.components.FormComponent):
+    """Same as gr.ColorPicker but fits inside gradio forms"""
+
+    def get_block_name(self):
+        return "colorpicker"
