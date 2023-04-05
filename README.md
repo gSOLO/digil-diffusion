@@ -17,9 +17,9 @@ Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-web
 - Prompt Matrix
 - Stable Diffusion Upscale
 - Attention, specify parts of text that the model should pay more attention to
-    - a man in a ((tuxedo)) - will pay more attention to tuxedo
-    - a man in a (tuxedo:1.21) - alternative syntax
-    - select text and press ctrl+up or ctrl+down to automatically adjust attention to selected text (code contributed by anonymous user)
+    - a man in a `((tuxedo))` - will pay more attention to tuxedo
+    - a man in a `(tuxedo:1.21)` - alternative syntax
+    - select text and press `Ctrl+Up` or `Ctrl+Down` to automatically adjust attention to selected text (code contributed by anonymous user)
 - Loopback, run img2img processing multiple times
 - X/Y/Z plot, a way to draw a 3 dimensional plot of images with different parameters
 - Textual Inversion
@@ -32,7 +32,7 @@ Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-web
     - CodeFormer, face restoration tool as an alternative to GFPGAN
     - RealESRGAN, neural network upscaler
     - ESRGAN, neural network upscaler with a lot of third party models
-    - SwinIR and Swin2SR([see here](https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/2092)), neural network upscalers
+    - SwinIR and Swin2SR ([see here](https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/2092)), neural network upscalers
     - LDSR, Latent diffusion super resolution upscaling
 - Resizing aspect ratio options
 - Sampling method selection
@@ -50,7 +50,7 @@ Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-web
      - drag and drop an image/text-parameters to promptbox
 - Read Generation Parameters Button, loads parameters in promptbox to UI
 - Settings page
-- Running arbitrary python code from UI (must run with --allow-code to enable)
+- Running arbitrary python code from UI (must run with `--allow-code` to enable)
 - Mouseover hints for most UI elements
 - Possible to change defaults/mix/max/step values for UI elements via text config
 - Tiling support, a checkbox to create images that can be tiled like textures
@@ -73,7 +73,7 @@ Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-web
      - also supports weights for prompts: `a cat :1.2 AND a dog AND a penguin :2.2`
 - No token limit for prompts (original stable diffusion lets you use up to 75 tokens)
 - DeepDanbooru integration, creates danbooru style tags for anime prompts
-- [xformers](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Xformers), major speed increase for select cards: (add --xformers to commandline args)
+- [xformers](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Xformers), major speed increase for select cards: (add `--xformers` to commandline args)
 - via extension: [History tab](https://github.com/yfszzx/stable-diffusion-webui-images-browser): view, direct and delete images conveniently within the UI
 - Generate forever option
 - Training tab
@@ -82,11 +82,11 @@ Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-web
 - Clip skip
 - Hypernetworks
 - Loras (same as Hypernetworks but more pretty)
-- A sparate UI where you can choose, with preview, which embeddings, hypernetworks or Loras to add to your prompt. 
+- A sparate UI where you can choose, with preview, which embeddings, hypernetworks or Loras to add to your prompt 
 - Can select to load a different VAE from settings screen
 - Estimated completion time in progress bar
 - API
-- Support for dedicated [inpainting model](https://github.com/runwayml/stable-diffusion#inpainting-with-stable-diffusion) by RunwayML.
+- Support for dedicated [inpainting model](https://github.com/runwayml/stable-diffusion#inpainting-with-stable-diffusion) by RunwayML
 - via extension: [Aesthetic Gradients](https://github.com/AUTOMATIC1111/stable-diffusion-webui-aesthetic-gradients), a way to generate images with a specific aesthetic by using clip images embeds (implementation of [https://github.com/vicgalle/stable-diffusion-aesthetic-gradients](https://github.com/vicgalle/stable-diffusion-aesthetic-gradients))
 - [Stable Diffusion 2.0](https://github.com/Stability-AI/stablediffusion) support - see [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#stable-diffusion-20) for instructions
 - [Alt-Diffusion](https://arxiv.org/abs/2211.06679) support - see [wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Features#alt-diffusion) for instructions
@@ -95,8 +95,6 @@ Check the [custom scripts](https://github.com/AUTOMATIC1111/stable-diffusion-web
 - Eased resolution restriction: generated image's domension must be a multiple of 8 rather than 64
 - Now with a license!
 - Reorder elements in the UI from settings screen
-- 
-
 
 ## Credits
 Licenses for borrowed code can be found in `Settings -> Licenses` screen, and also in `html/licenses.html` file.
