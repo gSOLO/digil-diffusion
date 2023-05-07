@@ -33,6 +33,8 @@ notification.mp3
 /test/stdout.txt
 /test/stderr.txt
 /cache.json
+/cache.json*
+/config_states/
 
 ## Digil Diffusion ##
 Digil Diffusion.lnk
